@@ -30,7 +30,7 @@ class TestCases(unittest.TestCase):
         for ix, (train_imgs, train_labels) in enumerate(self.test_cases['input']):
             knn = KNN(train_imgs, train_labels)
             knn.get_k_neighbours(self.test_cases['test_input'][ix][0], self.test_cases['rnd_K'][ix])
-            np.testing.assert_array_equal(knn.neighbors, self.test_cases['get_k_neig'][ix])
+            np.testing.assert_array_equal(knn.neighbours, self.test_cases['get_k_neig'][ix])
 
     def test_get_class(self):
         for ix, (train_imgs, train_labels) in enumerate(self.test_cases['input']):

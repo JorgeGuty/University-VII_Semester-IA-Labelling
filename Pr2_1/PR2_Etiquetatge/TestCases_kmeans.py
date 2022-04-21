@@ -6,6 +6,7 @@ from Kmeans import *
 from utils import *
 
 
+
 class TestCases(unittest.TestCase):
 
 
@@ -21,7 +22,6 @@ class TestCases(unittest.TestCase):
 
     def test_init_X(self):
         for ix, input in enumerate(self.test_cases['input']):
-
             km = KMeans(input, self.test_cases['shape'][ix])
             np.testing.assert_array_equal(km.X, self.test_cases['shape'][ix])
 

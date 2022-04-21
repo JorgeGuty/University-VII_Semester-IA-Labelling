@@ -1,11 +1,11 @@
 __authors__ = ['1647904']
 __group__ = 'DM.10'
 
-from _testcapi import INT_MAX
-
 import numpy as np
 from numpy.linalg import norm
 import utils
+
+maxint = 9223372036854775807
 
 class KMeans:
 
@@ -60,7 +60,7 @@ class KMeans:
         if not 'tolerance' in options:
             options['tolerance'] = 0.0
         if not 'max_iter' in options:
-            options['max_iter'] = INT_MAX
+            options['max_iter'] = maxint
         if not 'fitting' in options:
             options['fitting'] = 'WCD'  #within class distance.
 
@@ -103,7 +103,7 @@ class KMeans:
         """
         labels = []
         for pixel in self.X:
-            lower_distance = INT_MAX
+            lower_distance = maxint
             nearest_centroid = -1
             for index in range(len(self.centroids)):
                 distance = norm(np.array(pixel) - np.array(self.centroids[index]))
