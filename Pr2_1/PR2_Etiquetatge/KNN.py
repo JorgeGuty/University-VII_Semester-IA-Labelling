@@ -82,6 +82,8 @@ class KNN:
         distances[i + 1], distances[high] = distances[high], distances[i + 1]
         return i + 1
 
+
+
     def get_class(self):
         """
         Get the class by maximum voting

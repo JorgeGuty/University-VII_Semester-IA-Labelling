@@ -79,6 +79,7 @@ class TestCases(unittest.TestCase):
 
     def test_get_color(self):
         for ix, centroid in enumerate(self.test_cases['kmeans']):
+            print(centroid)
             color = get_colors(centroid)
             self.assertCountEqual(color, self.test_cases['color'][ix])
 

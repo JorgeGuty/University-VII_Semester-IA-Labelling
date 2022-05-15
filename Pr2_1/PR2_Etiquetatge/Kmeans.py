@@ -1,6 +1,8 @@
 __authors__ = ['1647904']
 __group__ = 'DM.10'
 
+import random
+from math import sqrt, floor
 import numpy as np
 from numpy.linalg import norm
 import utils
@@ -77,25 +79,75 @@ class KMeans:
         """
 
         if self.options['km_init'].lower() == 'first':
-            self.centroids = []
-            self.centroids.append(self.X[0])
-            initialized_centroids = 1
-            for pixel in self.X:
-                is_repeated = False
-                for centroid in self.centroids:
-                    if np.array_equal(pixel, centroid):
-                        is_repeated = True
-                if not is_repeated:
-                    self.centroids.append(pixel)
-                    initialized_centroids += 1
-                    if initialized_centroids == self.K:
-                        break
-            self.old_centroids = self.centroids
-#        elif self.options['km_init'].lower() == 'custom':
-
+            self.first_init()
+        elif self.options['km_init'].lower() == 'naive':
+            self.naive_sharding_init()
+        elif self.options['km_init'].lower() == 'kmeans++':
+            self.naive_sharding_init()
         else:
             self.centroids = np.random.rand(self.K, self.X.shape[1])
             self.old_centroids = np.random.rand(self.K, self.X.shape[1])
+
+    def first_init(self):
+        self.centroids = []
+        self.centroids.append(self.X[0])
+        initialized_centroids = 1
+        for pixel in self.X:
+            is_repeated = False
+            for centroid in self.centroids:
+                if np.array_equal(pixel, centroid):
+                    is_repeated = True
+            if not is_repeated:
+                self.centroids.append(pixel)
+                initialized_centroids += 1
+                if initialized_centroids == self.K:
+                    break
+        self.old_centroids = self.centroids
+
+    def naive_sharding_init(self):
+
+        def _get_mean(sums, step):
+            """Vectorizable ufunc for getting means of summed shard columns."""
+            return sums / step
+
+        n = np.shape(self.X)[1]
+        m = np.shape(self.X)[0]
+        centroids = np.zeros((self.K, n))
+
+        composite = np.mat(np.sum(self.X, axis=1))
+        ds = np.append(composite.T, self.X, axis=1)
+        ds.sort(axis=0)
+
+        step = floor(m / self.K)
+        vfunc = np.vectorize(_get_mean)
+
+        for j in range(self.K):
+            if j == self.K - 1:
+                centroids[j:] = vfunc(np.sum(ds[j * step:, 1:], axis=0), step)
+            else:
+                centroids[j:] = vfunc(np.sum(ds[j * step:(j + 1) * step, 1:], axis=0), step)
+
+        self.centroids = centroids
+
+    def plus_plus(self):
+        np.random.seed(random.random())
+        centroids = [self.X[0]]
+
+        for i in range(1, self.K):
+            dist_sq = np.array([min([np.inner(c - x, c - x) for c in centroids]) for x in self.X])
+            probs = dist_sq / dist_sq.sum()
+            cumulative_probs = probs.cumsum()
+            r = np.random.rand()
+
+            for j, p in enumerate(cumulative_probs):
+                if r < p:
+                    i = j
+                    break
+
+            centroids.append(self.X[i])
+
+        self.centroids = np.array(centroids)
+
 
     def get_labels(self):
         """        Calculates the closest centroid of all points in X
